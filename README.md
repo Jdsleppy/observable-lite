@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/Jdsleppy/observable-lite.svg?branch=master)](https://travis-ci.org/Jdsleppy/observable-lite)
+
 # observable-lite
 A feather-light observer implementation inspired by Reactive Extensions.
 
