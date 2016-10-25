@@ -10,7 +10,7 @@ class Observable(object):
     def __init__(self):
         self.observers = []
 
-    def __call__(self, data):
+    def __call__(self, data=None):
         for observer in self.observers:
             observer(data)
 

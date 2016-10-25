@@ -24,11 +24,9 @@ def test_single_subscription():
     observable = Observable()
     observer = MockFactory().one()
     subscription = observable.subscribe(observer)
-    assert not observer.called
 
     observable('message')
-    assert observer.call_count == 1
-    observer.assert_called_with('message')
+    observer.assert_called_once_with('message')
 
     observable('another message')
     assert observer.call_count == 2
@@ -43,18 +41,25 @@ def test_multiple_subscriptions():
     observers = MockFactory().get(3)
     subscriptions = [observable.subscribe(observer) for observer in observers]
 
-    for observer in observers:
-        assert not observer.called
-
     observable('message')
     for observer in observers:
-        assert observer.call_count == 1
-        observer.assert_called_with('message')
+        observer.assert_called_once_with('message')
 
     observable('another message')
     for observer in observers:
         assert observer.call_count == 2
         observer.assert_called_with('another message')
+
+
+def test_no_immediate_publish():
+    """
+    Subscribers should not receive any notifications until the observable is
+    called.
+    """
+    observable = Observable()
+    observer = MockFactory().one()
+    subscription = observable.subscribe(observer)
+    observer.assert_not_called()
 
 
 def test_unsubscription():
@@ -74,7 +79,7 @@ def test_unsubscription():
         assert observer.call_count == 2
         observer.assert_called_with('another message')
 
-    unsubscribed_observer.assert_called_with('message')
+    unsubscribed_observer.assert_called_once_with('message')
 
 
 def test_duplicate_subscriptions():
@@ -85,7 +90,6 @@ def test_duplicate_subscriptions():
     observable = Observable()
     observer = MockFactory().one()
     subscriptions = [observable.subscribe(observer) for _ in range(3)]
-    assert not observer.called
 
     observable('message')
     assert observer.call_count == 3
@@ -106,7 +110,6 @@ def test_duplicate_unsubscriptions():
     observable = Observable()
     observer = MockFactory().one()
     subscriptions = [observable.subscribe(observer) for _ in range(3)]
-    assert not observer.called
 
     observable('message')
 
@@ -125,3 +128,19 @@ def test_no_subscriptions():
     """
     observable = Observable()
     observable('message')
+
+
+def test_no_data():
+    """
+    The default data to send should be `None`.
+    """
+    observable = Observable()
+    observer = MockFactory().one()
+    subscription = observable.subscribe(observer)
+
+    observable()
+    observer.assert_called_once_with(None)
+
+    observable()
+    assert observer.call_count == 2
+    observer.assert_called_with(None)
